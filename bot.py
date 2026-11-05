@@ -1,4 +1,4 @@
-import os
+import os, time
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 from google import genai
@@ -13,20 +13,21 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
-    models = ["gemini-2.5-flash", "gemini-3.8-flash", "gemini-2.0-flash-lite"]
-    last_error = ""
+    models = ["gemini-2.5-flash-lite", "gemini-2.0-flash-lite", "gemini-1.5-flash"]
     for model_name in models:
         try:
             response = client.models.generate_content(
                 model=model_name,
-                contents=f"رد كصاحب جدع وودود: {text}"
+                contents=f"رد كصاحب جدع وودود بالعامية المصرية: {text}"
             )
-            await update.message.reply_text(response.text)
-            return
+            if response.text:
+                await update.message.reply_text(response.text)
+                return
         except Exception as e:
-            last_error = str(e)
+            print(f"فشل {model_name}: {e}")
+            time.sleep(2)
             continue
-    await update.message.reply_text(f"الخطأ هو: {last_error}")
+    await update.message.reply_text("جوجل عليها ضغط دلوقتي، جرب تاني بعد دقيقة 🙏")
 
 def main():
     app = ApplicationBuilder().token(TOKEN).build()
