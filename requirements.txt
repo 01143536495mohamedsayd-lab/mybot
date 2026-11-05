@@ -1,2 +1,2 @@
-pyTelegramBotAPI
-google-generativeai
+python-telegram-bot==20.7
+google-genai==1.0.0
