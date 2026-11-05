@@ -15,7 +15,7 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
     try:
         response = client.models.generate_content(
-            model="gemini-2.0-flash",
+            model="gemini-3.8-flash",
             contents=f"رد كصاحب جدع وودود: {text}"
         )
         await update.message.reply_text(response.text)
