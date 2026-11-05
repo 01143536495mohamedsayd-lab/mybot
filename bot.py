@@ -13,14 +13,20 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
-    try:
-        response = client.models.generate_content(
-            model="gemini-3.8-flash",
-            contents=f"رد كصاحب جدع وودود: {text}"
-        )
-        await update.message.reply_text(response.text)
-    except Exception as e:
-        await update.message.reply_text(f"الخطأ هو: {e}")
+    models = ["gemini-2.5-flash", "gemini-3.8-flash", "gemini-2.0-flash-lite"]
+    last_error = ""
+    for model_name in models:
+        try:
+            response = client.models.generate_content(
+                model=model_name,
+                contents=f"رد كصاحب جدع وودود: {text}"
+            )
+            await update.message.reply_text(response.text)
+            return
+        except Exception as e:
+            last_error = str(e)
+            continue
+    await update.message.reply_text(f"الخطأ هو: {last_error}")
 
 def main():
     app = ApplicationBuilder().token(TOKEN).build()
