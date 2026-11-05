@@ -1,25 +1,33 @@
 import os
-import telebot
-import google.generativeai as genai
+from telegram import Update
+from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+from google import genai
 
-TOKEN = os.getenv("BOT_TOKEN")
+TOKEN = os.getenv("TELEGRAM_TOKEN")
 GEMINI_KEY = os.getenv("GEMINI_API_KEY")
 
-bot = telebot.TeleBot(TOKEN)
-genai.configure(api_key=GEMINI_KEY)
-model = genai.GenerativeModel("gemini-1.5-flash")
+client = genai.Client(api_key=GEMINI_KEY)
 
-@bot.message_handler(commands=['start'])
-def start(message):
-    bot.reply_to(message, "اهلا بيك، انا بوت ذكاء اصطناعي، اسألني اي حاجة")
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("اهلا بيك يا صاحبي ❤️ انا بوت ذكي، اسألني اي حاجة!")
 
-@bot.message_handler(func=lambda m: True)
-def ai_reply(message):
+async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    text = update.message.text
     try:
-        bot.send_chat_action(message.chat.id, 'typing')
-        response = model.generate_content(message.text)
-        bot.reply_to(message, response.text)
-    except:
-        bot.reply_to(message, "حصل مشكلة، جرب تاني")
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=f"رد بالعامية المصرية وبطريقة صاحب جدع وودود: {text}"
+        )
+        await update.message.reply_text(response.text)
+    except Exception as e:
+        await update.message.reply_text("حصل مشكلة صغيرة، جرب تاني")
 
-bot.polling()
+def main():
+    app = Application.builder().token(TOKEN).build()
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, chat))
+    print("Bot is running...")
+    app.run_polling()
+
+if __name__ == "__main__":
+    main()
